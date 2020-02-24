@@ -1,2 +1,5 @@
+build
+dist
+pyevacalor.egg-info
 pyevacalor/__pycache__
 test.py
