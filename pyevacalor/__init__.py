@@ -344,12 +344,12 @@ class Device(object):
 
         retry_count = 0
         res = self.__evacalor.handle_webcall("GET", url, payload)
-        while ((res is False or res['jobAnswerStatus'] != "completed") and retry_count < 5):
+        while ((res is False or res['jobAnswerStatus'] != "completed") and retry_count < 10):
             time.sleep(1)
             res = self.__evacalor.handle_webcall("GET", url, payload)
             retry_count = retry_count + 1
 
-        if res is False:
+        if res is False or res['jobAnswerStatus'] != "completed":
             raise Error("Error while fetching device information")
 
         current_i = 0
@@ -372,6 +372,12 @@ class Device(object):
             self.__register_map_dict[item]['format_string'],
             eval(formula)
         )
+
+    def __get_information_item_min(self, item):
+        return int(self.__register_map_dict[item]['set_min'])
+
+    def __get_information_item_max(self, item):
+        return int(self.__register_map_dict[item]['set_max'])
 
     @property
     def id(self):
@@ -406,18 +412,42 @@ class Device(object):
         return self.__id_registers_map
 
     @property
+    def status_managed(self):
+        return int(self.__get_information_item('status_managed_get'))
+
+    @property
+    def status_managed_enable(self):
+        return int(self.__get_information_item('status_managed_on_enable'))
+
+    @property
     def status(self):
+        return int(self.__get_information_item('status_get'))
+
+    @property
+    def status_translated(self):
         return self.__evacalor.statusTranslated[
             int(self.__get_information_item('status_get'))
         ]
 
     @property
+    def alarms(self):
+        return self.__get_information_item('alarms_get')
+
+    @property
+    def min_temp(self):
+        return self.__get_information_item_min('temp_air_set')
+
+    @property
+    def max_temp(self):
+        return self.__get_information_item_max('temp_air_set')
+
+    @property
     def air_temperature(self):
-        return self.__get_information_item('temp_air_get')
+        return float(self.__get_information_item('temp_air_get'))
 
     @property
     def set_air_temperature(self):
-        return self.__get_information_item('temp_air_set')
+        return float(self.__get_information_item('temp_air_set'))
 
     @set_air_temperature.setter
     def set_air_temperature(self, value):
@@ -425,15 +455,15 @@ class Device(object):
 
     @property
     def gas_temperature(self):
-        return self.__get_information_item('temp_gas_flue_get')
+        return float(self.__get_information_item('temp_gas_flue_get'))
 
     @property
     def real_power(self):
-        return self.__get_information_item('real_power_get')
+        return int(self.__get_information_item('real_power_get'))
 
     @property
     def set_power(self):
-        return self.__get_information_item('power_set')
+        return int(self.__get_information_item('power_set'))
 
     @set_power.setter
     def set_power(self, value):
@@ -454,11 +484,5 @@ class UnauthorizedError(Error):
 
 class ConnectionError(Error):
     """Unauthorized"""
-    def __init__(self, message):
-        super().__init__(message)
-
-
-class InvalidURLError(Error):
-    """Invalid URL"""
     def __init__(self, message):
         super().__init__(message)
