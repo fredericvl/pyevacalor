@@ -354,11 +354,14 @@ class Device(object):
 
         current_i = 0
         information_dict = dict()
-        for item in res['jobAnswerData']['Items']:
-            information_dict.update({
-                item: res['jobAnswerData']['Values'][current_i]
-            })
-            current_i = current_i + 1
+        try:
+            for item in res['jobAnswerData']['Items']:
+                information_dict.update({
+                    item: res['jobAnswerData']['Values'][current_i]
+                })
+                current_i = current_i + 1
+        except KeyError:
+            raise Error("Error while fetching device information")
 
         self.__information_dict = information_dict
 
