@@ -185,7 +185,6 @@ class evacalor(object):
 
         res = response.json()
         self.token = res['token']
-        self.refresh_token = res['refresh_token']
 
         claimset = jwt.decode(res['token'], verify=False)
         self.token_expires = claimset.get('exp')
