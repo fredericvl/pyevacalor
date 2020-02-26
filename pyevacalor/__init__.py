@@ -394,17 +394,10 @@ class Device(object):
         return int(self.__register_map_dict[item]['set_max'])
 
     def __prepare_value_for_writing(self, item, value):
-        value = int(value)
-        min = self.__register_map_dict[item]['set_min']
-        max = self.__register_map_dict[item]['set_max']
-
-        if value < min or value > max:
-            raise ValueError
-
         formula = self.__register_map_dict[item]['formula_inverse']
         formula = formula.replace(
             "#",
-            int(value)
+            str(value)
         )
         return [int(str.format(
             self.__register_map_dict[item]['format_string'],
