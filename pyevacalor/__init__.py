@@ -399,10 +399,10 @@ class Device(object):
             "#",
             str(value)
         )
-        return [int(str.format(
+        return [int(float(str.format(
             self.__register_map_dict[item]['format_string'],
             eval(formula)
-        ))]
+        )))]
 
     def __request_writing(self, item, values):
         url = (API_URL + API_PATH_DEVICE_WRITING)
