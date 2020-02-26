@@ -29,6 +29,7 @@ API_PATH_DEVICE_INFO = "/deviceGetInfo"
 API_PATH_DEVICE_REGISTERS_MAP = "/deviceGetRegistersMap"
 API_PATH_DEVICE_BUFFER_READING = "/deviceGetBufferReading"
 API_PATH_DEVICE_JOB_STATUS = "/deviceJobStatus/"
+API_PATH_DEVICE_WRITING = "/deviceRequestWriting"
 EVA_CALOR_CUSTOMER_CODE = "635987"
 EVA_COLOR_BRAND_ID = "1"
 
@@ -313,8 +314,19 @@ class Device(object):
                         'formula_inverse': register['formula_inverse'],
                         'format_string': register['format_string'],
                         'set_min': register['set_min'],
-                        'set_max': register['set_max']
+                        'set_max': register['set_max'],
+                        'mask': register['mask']
                     })
+                    if 'enc_val' in register:
+                        for v in register['enc_val']:
+                            if v['lang'] == "ENG" and v['description'] == 'ON':
+                                register_dict.update({
+                                    'value_on': v['value']
+                                })
+                            elif v['lang'] == "ENG" and v['description'] == 'OFF':
+                                register_dict.update({
+                                    'value_off': v['value']
+                                })
                     register_map_dict.update({
                         register['reg_key']: register_dict
                     })
@@ -380,6 +392,63 @@ class Device(object):
 
     def __get_information_item_max(self, item):
         return int(self.__register_map_dict[item]['set_max'])
+
+    def __prepare_value_for_writing(self, item, value):
+        value = int(value)
+        min = self.__register_map_dict[item]['set_min']
+        max = self.__register_map_dict[item]['set_max']
+
+        if value < min or value > max:
+            raise ValueError
+
+        formula = self.__register_map_dict[item]['formula_inverse']
+        formula = formula.replace(
+            "#",
+            int(value)
+        )
+        return [int(str.format(
+            self.__register_map_dict[item]['format_string'],
+            eval(formula)
+        ))]
+
+    def __request_writing(self, item, values):
+        url = (API_URL + API_PATH_DEVICE_WRITING)
+
+        items = [int(self.__register_map_dict[item]['offset'])]
+        masks = [int(self.__register_map_dict[item]['mask'])]
+
+        payload = {
+                'id_device': self.__id_device,
+                'id_product': self.__id_product,
+                "Protocol": "RWMSmaster",
+                "BitData": [8],
+                "Endianess": ["L"],
+                "Items": items,
+                "Masks": masks,
+                "Values": values
+        }
+        payload = json.dumps(payload)
+
+        res = self.__evacalor.handle_webcall("POST", url, payload)
+        if res is False:
+            raise Error("Error while request device writing")
+
+        id_request = res['idRequest']
+
+        url = (API_URL + API_PATH_DEVICE_JOB_STATUS + id_request)
+
+        payload = {}
+        payload = json.dumps(payload)
+
+        retry_count = 0
+        res = self.__evacalor.handle_webcall("GET", url, payload)
+        while ((res is False or res['jobAnswerStatus'] != "completed") and retry_count < 10):
+            time.sleep(1)
+            res = self.__evacalor.handle_webcall("GET", url, payload)
+            retry_count = retry_count + 1
+
+        if res is False or res['jobAnswerStatus'] != "completed" or 'Cmd' not in res['jobAnswerData']:
+            raise Error("Error while request device writing")
 
     @property
     def id(self):
@@ -453,7 +522,12 @@ class Device(object):
 
     @set_air_temperature.setter
     def set_air_temperature(self, value):
-        """ TODO: implement set temp """
+        item = 'temp_air_set'
+        values = self.__prepare_value_for_writing(item, value)
+        try:
+            self.__request_writing(item, values)
+        except Error:
+            raise Error("Error while trying to set temperature")
 
     @property
     def gas_temperature(self):
@@ -469,7 +543,28 @@ class Device(object):
 
     @set_power.setter
     def set_power(self, value):
-        """ TODO: implement set power """
+        item = 'power_set'
+        values = self.__prepare_value_for_writing(item, value)
+        try:
+            self.__request_writing(item, values)
+        except Error:
+            raise Error("Error while trying to set power")
+
+    def turn_off(self):
+        item = 'status_managed_get'
+        values = [int(self.__register_map_dict[item]['value_off'])]
+        try:
+            self.__request_writing(item, values)
+        except Error:
+            raise Error("Error while trying to turn off device")
+
+    def turn_on(self):
+        item = 'status_managed_get'
+        values = [int(self.__register_map_dict['status_managed_get']['value_on'])]
+        try:
+            self.__request_writing(item, values)
+        except Error:
+            raise Error("Error while trying to turn on device")
 
 
 class Error(Exception):
