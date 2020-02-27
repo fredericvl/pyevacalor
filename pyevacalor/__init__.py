@@ -180,7 +180,7 @@ class evacalor(object):
             raise ConnectionError(str.format("Connection to {0} not possible", url))
 
         if response.status_code != 201:
-            _LOGGER.error("Refresh auth token failed, forcing new login...")
+            _LOGGER.warning("Refresh auth token failed, forcing new login...")
             self.login()
             return
 
@@ -300,6 +300,7 @@ class Device(object):
 
         res = self.__evacalor.handle_webcall("POST", url, payload)
         if res is False:
+            _LOGGER.debug("GETREGISTERSMAP CALL FAILED!")
             raise Error("Error while fetching registers map")
 
         for registers_map in res['device_registers_map']['registers_map']:
@@ -330,6 +331,7 @@ class Device(object):
                     register_map_dict.update({
                         register['reg_key']: register_dict
                     })
+                _LOGGER.debug("SUCCESSFULLY UPDATED REGISTERS MAP!")
                 self.__register_map_dict = register_map_dict
 
     def __update_device_information(self):
@@ -344,7 +346,10 @@ class Device(object):
 
         res = self.__evacalor.handle_webcall("POST", url, payload)
         if res is False:
+            _LOGGER.debug("GETBUFFERREADING CALL FAILED!")
             raise Error("Error while fetching device information")
+
+        _LOGGER.debug("GETBUFFERREADING SUCCEEDED!")
 
         id_request = res['idRequest']
 
@@ -361,7 +366,10 @@ class Device(object):
             retry_count = retry_count + 1
 
         if res is False or res['jobAnswerStatus'] != "completed":
+            _LOGGER.debug("JOBANSWERSTATUS NOT COMPLETED!")
             raise Error("Error while fetching device information")
+
+        _LOGGER.debug("JOBANSWERSTATUS COMPLETED!")
 
         current_i = 0
         information_dict = dict()
@@ -372,7 +380,10 @@ class Device(object):
                 })
                 current_i = current_i + 1
         except KeyError:
+            _LOGGER.debug("NO ITEMS IN JOBANSWERDATA!")
             raise Error("Error while fetching device information")
+
+        _LOGGER.debug("SUCCESSFULLY RETRIEVED ITEM IN JOBANSWERDATA!")
 
         self.__information_dict = information_dict
 
@@ -394,6 +405,17 @@ class Device(object):
         return int(self.__register_map_dict[item]['set_max'])
 
     def __prepare_value_for_writing(self, item, value):
+        value = float(value)
+        set_min = self.__register_map_dict[item]['set_min']
+        set_max = self.__register_map_dict[item]['set_max']
+
+        if value < set_min or value > set_max:
+            raise ValueError(
+                "Value must be between {0} and {1}".format(
+                    set_min, set_max
+                )
+            )
+
         formula = self.__register_map_dict[item]['formula_inverse']
         formula = formula.replace(
             "#",
