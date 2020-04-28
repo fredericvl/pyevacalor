@@ -30,6 +30,7 @@ API_PATH_DEVICE_REGISTERS_MAP = "/deviceGetRegistersMap"
 API_PATH_DEVICE_BUFFER_READING = "/deviceGetBufferReading"
 API_PATH_DEVICE_JOB_STATUS = "/deviceJobStatus/"
 API_PATH_DEVICE_WRITING = "/deviceRequestWriting"
+DEFAULT_TIMEOUT_VALUE = 5
 EVA_CALOR_CUSTOMER_CODE = "635987"
 EVA_COLOR_BRAND_ID = "1"
 
@@ -116,8 +117,11 @@ class evacalor(object):
         payload = json.dumps(payload)
 
         try:
-            response = requests.post(url, data=payload, headers=self._headers(),
-                                     allow_redirects=False)
+            response = requests.post(url,
+                                     data=payload,
+                                     headers=self._headers(),
+                                     allow_redirects=False,
+                                     timeout=DEFAULT_TIMEOUT_VALUE)
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             raise ConnectionError(str.format("Connection to {0} not possible", url))
 
@@ -146,8 +150,11 @@ class evacalor(object):
         headers.update(extra_headers)
 
         try:
-            response = requests.post(url, data=payload, headers=headers,
-                                     allow_redirects=False)
+            response = requests.post(url,
+                                     data=payload,
+                                     headers=headers,
+                                     allow_redirects=False,
+                                     timeout=DEFAULT_TIMEOUT_VALUE)
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             raise ConnectionError(str.format("Connection to {0} not possible", url))
 
@@ -174,8 +181,11 @@ class evacalor(object):
         payload = json.dumps(payload)
 
         try:
-            response = requests.post(url, data=payload, headers=self._headers(),
-                                     allow_redirects=False)
+            response = requests.post(url,
+                                     data=payload,
+                                     headers=self._headers(),
+                                     allow_redirects=False,
+                                     timeout=DEFAULT_TIMEOUT_VALUE)
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             raise ConnectionError(str.format("Connection to {0} not possible", url))
 
@@ -249,11 +259,17 @@ class evacalor(object):
 
         try:
             if method == "POST":
-                response = requests.post(url, data=payload, headers=headers,
-                                         allow_redirects=False)
+                response = requests.post(url,
+                                         data=payload,
+                                         headers=headers,
+                                         allow_redirects=False,
+                                         timeout=DEFAULT_TIMEOUT_VALUE)
             else:
-                response = requests.get(url, data=payload, headers=headers,
-                                        allow_redirects=False)
+                response = requests.get(url,
+                                        data=payload,
+                                        headers=headers,
+                                        allow_redirects=False,
+                                        timeout=DEFAULT_TIMEOUT_VALUE)
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             raise ConnectionError(str.format("Connection to {0} not possible", url))
 
