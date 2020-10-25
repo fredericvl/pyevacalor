@@ -4,6 +4,7 @@ the IOT Agua platform of Micronova
 import jwt
 import json
 import logging
+import re
 import requests
 import socket
 import time
@@ -545,7 +546,8 @@ class Device(object):
 
     @property
     def air_temperature(self):
-        return float(self.__get_information_item('temp_air_get'))
+        numbers = re.compile(r'\d+(?:\.\d+)?')
+        return numbers.findall(self.__get_information_item('temp_air_get'))[0]
 
     @property
     def set_air_temperature(self):
@@ -562,7 +564,8 @@ class Device(object):
 
     @property
     def gas_temperature(self):
-        return float(self.__get_information_item('temp_gas_flue_get'))
+        numbers = re.compile(r'\d+(?:\.\d+)?')
+        return numbers.findall(self.__get_information_item('temp_gas_flue_get'))[0]
 
     @property
     def real_power(self):
