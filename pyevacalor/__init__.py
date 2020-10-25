@@ -547,7 +547,7 @@ class Device(object):
     @property
     def air_temperature(self):
         numbers = re.compile(r'\d+(?:\.\d+)?')
-        return numbers.findall(self.__get_information_item('temp_air_get'))[0]
+        return float(numbers.findall(self.__get_information_item('temp_air_get'))[0])
 
     @property
     def set_air_temperature(self):
@@ -565,7 +565,7 @@ class Device(object):
     @property
     def gas_temperature(self):
         numbers = re.compile(r'\d+(?:\.\d+)?')
-        return numbers.findall(self.__get_information_item('temp_gas_flue_get'))[0]
+        return float(numbers.findall(self.__get_information_item('temp_gas_flue_get'))[0])
 
     @property
     def real_power(self):
