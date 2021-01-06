@@ -2,6 +2,8 @@
 
 pyevacalor provides controlling Eva Calor heating devices connected via the IOT Agua platform of Micronova.
 
+**Warning: this module is not tested with multiple devices, there is no guarantee that it will work with your Eva Calor heating device.**
+
 ## Example usage
 
 ```
@@ -15,3 +17,9 @@ connection = evacalor("john.smith@gmail.com", "mysecretpassword", "1c3be3cd-360c
 for device in connection.devices:
   print(device.name + ": " + str(device.air_temperature))
 ```
+
+## Other examples
+
+### Home Assistant
+
+See [examples/home-assistant/README.md](examples/home-assistant/README.md)

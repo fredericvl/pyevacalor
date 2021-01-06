@@ -1,0 +1,9 @@
+{
+  "domain": "evacalor",
+  "name": "Eva Calor",
+  "documentation": "https://github.com/fredericvl/pyevacalor/tree/master/pyevacalor/examples/home-assistant/evacalor",
+  "requirements": ["pyevacalor==0.0.10"],
+  "dependencies": [],
+  "codeowners": ["@fredericvl"],
+  "config_flow": true
+}
