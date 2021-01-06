@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyevacalor",
-    version="0.0.9",
+    version="0.0.10",
     author="Frederic Van Linthoudt",
     author_email="frederic.van.linthoudt@gmail.com",
     description="pyevacalor provides controlling Eva Calor heating devices connected via the IOT Agua platform of Micronova",
@@ -17,5 +17,9 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
+    ],
+    install_requires=[
+        "PyJWT==1.7.1",
+        "requests==2.25.1",
     ],
 )
