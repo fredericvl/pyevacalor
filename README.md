@@ -1,3 +1,7 @@
+**!!! WARNING: THIS MODULE IS NOT MAINTAINED ANYMORE !!!**
+
+**GENERIC AGUA IOT MODULE WITH THE SAME FUNCTIONALITIES AVAILABLE OVER [HERE](https://github.com/fredericvl/py-agua-iot)**
+
 # pyevacalor
 
 pyevacalor provides controlling Eva Calor heating devices connected via the IOT Agua platform of Micronova.
